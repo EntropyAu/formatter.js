@@ -92,6 +92,25 @@ function Formatter(el, opts) {
       self._focus(evt);
     });
   }
+
+  if (this.patternMatcher.patterns.length > 1) {
+    // Get current state
+    this.sel = inptSel.get(this.el);
+    this.val = this.el.value;
+    // Init values
+    this.delta = 0;
+    //reset input for each pattern
+    for (var i = 0; i < this.patternMatcher.patterns.length; i++) {
+        var newPattern = this.patternMatcher.patterns[i];
+        this.mLength = newPattern.mLength;
+        this.chars = newPattern.chars;
+        this.inpts = newPattern.inpts;
+        //remove the chars for this pattern
+        this._removeChars();
+    }
+    //we've got a completely unformatted string now, so let's format it
+    this._formatValue(true);
+  }
 }
 
 //
@@ -349,6 +368,10 @@ Formatter.prototype._removeChars = function () {
     if (curChar && curChar === val || curHldr && curHldr === val) {
       this.val = utils.removeChars(this.val, pos, pos + 1);
       shift--;
+
+      if (pos < this.newPos) {
+        this.newPos--;
+      }
     }
   }
 
@@ -429,7 +452,7 @@ Formatter.prototype._addChar = function (i) {
 
   // If chars are added in between the old pos and new pos
   // we need to increment pos and delta
-  if (utils.isBetween(i, [this.sel.begin -1, this.newPos +1])) {
+  if (utils.isBetween(i, [-1, this.newPos +1])) {
     this.newPos ++;
     this.delta ++;
   }
